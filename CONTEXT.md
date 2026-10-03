@@ -8,6 +8,10 @@ This context defines the language for an original browser RPG inspired by the de
 The first pilgrimage scene: a coastal village and beach path where the first playable slice begins. It establishes home, shoreline danger, and the path toward the wider pilgrimage.
 _Avoid_: Besaid, starter town, beach level
 
+**Tidewake Walking Slice**:
+The first implementation slice: tooling plus a tiny controllable Tidewake scene. It proves rendering, camera volumes, movement, collision boundaries, and basic HUD before combat is added.
+_Avoid_: Prototype, tech demo, scaffold
+
 **Tidewake Interaction Set**:
 The non-combat interaction boundary for the first slice: three NPC interactions, one save point, and one exit gate. It excludes shops until inventory and economy have real gameplay responsibility.
 _Avoid_: Town features, village content, side activities
@@ -28,9 +32,29 @@ _Avoid_: Camera trigger, shot zone, view area
 Exploration movement where the player chooses a ground destination and Kael walks toward it. Keyboard movement remains available as a fallback, but destination movement is the primary fixed-camera feel.
 _Avoid_: Click movement, point-and-click, mouse walking
 
+**Walkable Boundary**:
+A simple collision boundary that defines where Kael can move inside a pilgrimage scene. The first slice uses path boundaries and circular blockers rather than mesh-perfect collision.
+_Avoid_: Collision mesh, navmesh, physics wall
+
 **Dialogue Box**:
 The JRPG-style text surface for NPC interactions, including a nameplate, portrait, and concise lines. The first slice keeps dialogue short enough to support tone without becoming a dialogue-system project.
 _Avoid_: Chat window, textbox, conversation UI
+
+**Controls Strip**:
+A minimal HUD row that shows mouse movement, WASD fallback, interact, and menu controls. It teaches controls without blocking the first scene with a tutorial modal.
+_Avoid_: Tutorial overlay, help panel, controls modal
+
+**Direct-File Build**:
+A packaged browser build that can run from a double-clicked `index.html` through `file://`. It exists alongside the development server path.
+_Avoid_: Offline mode, static export, production build
+
+**Evidence Contract**:
+The verification report expected for each MVP commit. It includes typecheck/build, domain logic tests, browser smoke interaction, nonblank 3D render evidence, and direct-file smoke once packaging exists.
+_Avoid_: Done checklist, QA notes, test plan
+
+**Audio Baseline**:
+The first slice's minimal sound set: ambience, battle loop, hit sound, confirm sound, save sound, and mute control. It gives the RPG tone audible texture without requiring a full score.
+_Avoid_: Soundtrack, music system, audio polish
 
 **Battle Arena**:
 A staged combat space entered from a pilgrimage scene when an encounter begins. It presents party members, enemies, and the turn timeline without sharing exploration movement rules.
