@@ -53,3 +53,18 @@ test("root index opens Tidewake from file protocol", async ({ page }) => {
   await expect(page.locator("canvas")).toBeVisible();
   expect(consoleErrors).toEqual([]);
 });
+
+test("dev html also opens Tidewake from file protocol", async ({ page }) => {
+  const consoleErrors: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") {
+      consoleErrors.push(message.text());
+    }
+  });
+
+  await page.goto(pathToFileURL(resolve("dev.html")).href);
+  await expect(page.getByRole("heading", { name: "Tidewake" })).toBeVisible();
+  await expect(page.getByTestId("camera-volume")).toContainText("Village Square");
+  await expect(page.locator("canvas")).toBeVisible();
+  expect(consoleErrors).toEqual([]);
+});
