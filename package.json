@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "tsc && vite build",
-    "check": "npm run test:unit && npm run build && npm run test:browser",
+    "check": "npm run test:unit && npm run build && npm run bundle:direct && npm run test:browser",
     "test:unit": "vitest run",
     "test:browser": "playwright test",
     "bundle:direct": "node scripts/build-direct.mjs"
