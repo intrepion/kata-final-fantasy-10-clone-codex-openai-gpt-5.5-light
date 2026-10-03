@@ -1,0 +1,26 @@
+{
+  "name": "kata-final-fantasy-10-clone-codex-openai-gpt-5-5-light",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc && vite build",
+    "check": "npm run test:unit && npm run build && npm run test:browser",
+    "test:unit": "vitest run",
+    "test:browser": "playwright test",
+    "bundle:direct": "node scripts/build-direct.mjs"
+  },
+  "dependencies": {
+    "@vitejs/plugin-basic-ssl": "^2.1.0",
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.1",
+    "@types/node": "^24.5.2",
+    "@types/three": "^0.180.0",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.7",
+    "vitest": "^3.2.4"
+  }
+}
