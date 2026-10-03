@@ -24,12 +24,12 @@ export type BattleState = {
 const ATTACK_DELAY = 50;
 const SWAP_DELAY = 24;
 
-export function createTeachingBattle(): BattleState {
+export function createTeachingBattle(partyHp: Record<string, number> = {}): BattleState {
   return {
     combatants: [
-      createPartyMember("kael", "Kael", 40, 18, true),
-      createPartyMember("maera", "Maera", 32, 12, false),
-      createPartyMember("orun", "Orun", 48, 9, false),
+      createPartyMember("kael", "Kael", 40, partyHp.kael ?? 40, 18, true),
+      createPartyMember("maera", "Maera", 32, partyHp.maera ?? 32, 12, false),
+      createPartyMember("orun", "Orun", 48, partyHp.orun ?? 48, 9, false),
       {
         id: "skitterfin",
         name: "Skitterfin",
@@ -167,6 +167,7 @@ function createPartyMember(
   id: CombatantId,
   name: string,
   maxHp: number,
+  hp: number,
   speed: number,
   active: boolean
 ): Combatant {
@@ -174,7 +175,7 @@ function createPartyMember(
     id,
     name,
     side: "party",
-    hp: maxHp,
+    hp,
     maxHp,
     speed,
     delay: active ? 0 : 35,

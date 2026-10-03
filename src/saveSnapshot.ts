@@ -12,16 +12,13 @@ export type SaveSnapshot = {
 export function createSaveSnapshot(
   scenePosition: Vec2,
   defeatedEncounters: string[],
-  progression: ProgressionState
+  progression: ProgressionState,
+  partyHp: Record<string, number>
 ): SaveSnapshot {
   return {
     scenePosition,
     defeatedEncounters,
-    partyHp: {
-      kael: 40,
-      maera: 32,
-      orun: 48
-    },
+    partyHp,
     echoShards: progression.echoShards,
     unlockedNodes: progression.unlockedNodes
   };

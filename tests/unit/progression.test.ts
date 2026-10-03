@@ -19,7 +19,11 @@ describe("progression board and save snapshot", () => {
 
   it("round-trips a Memory Tide save snapshot", () => {
     const progression = unlockBoardNode(awardEchoShard(createProgressionState()), "quick-step");
-    const snapshot = createSaveSnapshot({ x: -14, z: 0 }, ["skitterfin"], progression);
+    const snapshot = createSaveSnapshot({ x: -14, z: 0 }, ["skitterfin"], progression, {
+      kael: 33,
+      maera: 32,
+      orun: 48
+    });
 
     expect(parseSaveSnapshot(serializeSaveSnapshot(snapshot))).toEqual(snapshot);
   });

@@ -3,6 +3,8 @@ export class TidewakeAudio {
   private muted = true;
   private ambience: OscillatorNode | undefined;
   private gain: GainNode | undefined;
+  private battleLoop: OscillatorNode | undefined;
+  private battleGain: GainNode | undefined;
 
   get isMuted(): boolean {
     return this.muted;
@@ -13,6 +15,7 @@ export class TidewakeAudio {
 
     if (this.muted) {
       this.stopAmbience();
+      this.stopBattleLoop();
       return this.muted;
     }
 
@@ -28,6 +31,34 @@ export class TidewakeAudio {
 
   async playSave(): Promise<void> {
     await this.playTone(880, 0.16, 0.05);
+  }
+
+  async playHit(): Promise<void> {
+    await this.playTone(110, 0.1, 0.07);
+  }
+
+  async startBattleLoop(): Promise<void> {
+    if (this.muted || this.battleLoop || this.battleGain) {
+      return;
+    }
+
+    const context = await this.ensureContext();
+    this.battleLoop = context.createOscillator();
+    this.battleGain = context.createGain();
+    this.battleLoop.type = "sawtooth";
+    this.battleLoop.frequency.value = 98;
+    this.battleGain.gain.value = 0.018;
+    this.battleLoop.connect(this.battleGain);
+    this.battleGain.connect(context.destination);
+    this.battleLoop.start();
+  }
+
+  stopBattleLoop(): void {
+    this.battleLoop?.stop();
+    this.battleLoop?.disconnect();
+    this.battleGain?.disconnect();
+    this.battleLoop = undefined;
+    this.battleGain = undefined;
   }
 
   private async ensureContext(): Promise<AudioContext> {

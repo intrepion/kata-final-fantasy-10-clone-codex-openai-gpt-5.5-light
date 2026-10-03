@@ -164,6 +164,7 @@ let previousTime = performance.now();
 let battleState: BattleState | undefined;
 let progression: ProgressionState = createProgressionState();
 let defeatedEncounters: string[] = [];
+let partyHp: Record<string, number> = { kael: 40, maera: 32, orun: 48 };
 let battleRewardGranted = false;
 
 restoreSnapshot();
@@ -179,7 +180,7 @@ window.addEventListener("keydown", (event) => {
   pressedKeys.add(event.code);
 
   if (event.code === "KeyM") {
-    void toggleAudio();
+    boardPanelElement.hidden = !boardPanelElement.hidden;
   }
 
   if (event.code === "KeyE" && canStartPathEncounter()) {
@@ -217,6 +218,8 @@ app.addEventListener("click", (event) => {
 
   if (target.dataset.command === "attack") {
     battleState = attack(battleState);
+    syncPartyHpFromBattle();
+    void audio.playHit();
   }
 
   if (target.dataset.command === "inspect") {
@@ -327,13 +330,14 @@ function startBattle(): void {
     return;
   }
 
-  battleState = createTeachingBattle();
+  battleState = createTeachingBattle(partyHp);
   battleRewardGranted = false;
   battlePanelElement.hidden = false;
   boardPanelElement.hidden = true;
   destinationMarker.visible = false;
   renderBattle();
   void audio.playConfirm();
+  void audio.startBattleLoop();
 }
 
 function renderBattle(): void {
@@ -372,6 +376,7 @@ function renderBattle(): void {
     progression = awardEchoShard(progression);
     battlePanelElement.hidden = true;
     battleState = undefined;
+    audio.stopBattleLoop();
     boardPanelElement.hidden = false;
     updatePathEncounter();
     renderProgression();
@@ -404,7 +409,7 @@ function canUseMemoryTide(): boolean {
 }
 
 function saveAtMemoryTide(): void {
-  const snapshot = createSaveSnapshot(kaelPosition, defeatedEncounters, progression);
+  const snapshot = createSaveSnapshot(kaelPosition, defeatedEncounters, progression, partyHp);
   localStorage.setItem("tidewake-save", serializeSaveSnapshot(snapshot));
   void audio.playSave();
 }
@@ -424,11 +429,24 @@ function applySnapshot(snapshot: SaveSnapshot): void {
   kaelPosition = snapshot.scenePosition;
   destination = { ...snapshot.scenePosition };
   defeatedEncounters = snapshot.defeatedEncounters;
+  partyHp = snapshot.partyHp;
   progression = {
     echoShards: snapshot.echoShards,
     unlockedNodes: snapshot.unlockedNodes
   };
   renderProgression();
+}
+
+function syncPartyHpFromBattle(): void {
+  if (!battleState) {
+    return;
+  }
+
+  partyHp = Object.fromEntries(
+    battleState.combatants
+      .filter((combatant) => combatant.side === "party")
+      .map((combatant) => [combatant.id, combatant.hp])
+  );
 }
 
 function buildScene(): void {
