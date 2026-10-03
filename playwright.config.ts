@@ -16,7 +16,7 @@ export default defineConfig({
   },
   webServer: {
     command: "npm run build && npm run bundle:direct && npx vite preview --host 127.0.0.1 --port 44173",
-    url: "http://127.0.0.1:44173",
+    url: "http://127.0.0.1:44173/dev.html",
     reuseExistingServer: false,
     timeout: 120_000
   },

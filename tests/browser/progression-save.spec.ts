@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("winning a path encounter awards an Echo Shard, unlocks a board node, and saves it", async ({
   page
 }) => {
-  await page.goto("/");
+  await page.goto("/dev.html");
   await page.keyboard.down("KeyD");
   await page.waitForTimeout(2400);
   await page.keyboard.up("KeyD");

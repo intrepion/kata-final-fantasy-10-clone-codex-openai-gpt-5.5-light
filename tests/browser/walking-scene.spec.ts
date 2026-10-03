@@ -8,7 +8,7 @@ test("MVP 1A renders Tidewake and lets Kael move through camera volumes", async 
     }
   });
 
-  await page.goto("/");
+  await page.goto("/dev.html");
   await expect(page.getByRole("heading", { name: "Tidewake" })).toBeVisible();
   await expect(page.getByTestId("camera-volume")).toContainText("Village Square");
   await page.keyboard.press("KeyM");

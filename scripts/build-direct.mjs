@@ -5,6 +5,20 @@ import { fileURLToPath } from "node:url";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const outdir = resolve(root, "file-dist");
+const directHtml = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tidewake Pilgrimage</title>
+    <link rel="stylesheet" href="./file-dist/game.bundle.css" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script defer src="./file-dist/game.bundle.js"></script>
+  </body>
+</html>
+`;
 
 await mkdir(outdir, { recursive: true });
 
@@ -41,3 +55,4 @@ await writeFile(
 </html>
 `
 );
+await writeFile(resolve(root, "index.html"), directHtml);

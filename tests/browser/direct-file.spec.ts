@@ -38,3 +38,18 @@ test("direct-file build opens Tidewake from file protocol", async ({ page }) => 
   expect(canvasPixels).toBeGreaterThan(0);
   expect(consoleErrors).toEqual([]);
 });
+
+test("root index opens Tidewake from file protocol", async ({ page }) => {
+  const consoleErrors: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") {
+      consoleErrors.push(message.text());
+    }
+  });
+
+  await page.goto(pathToFileURL(resolve("index.html")).href);
+  await expect(page.getByRole("heading", { name: "Tidewake" })).toBeVisible();
+  await expect(page.getByTestId("camera-volume")).toContainText("Village Square");
+  await expect(page.locator("canvas")).toBeVisible();
+  expect(consoleErrors).toEqual([]);
+});

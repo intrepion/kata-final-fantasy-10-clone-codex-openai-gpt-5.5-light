@@ -8,7 +8,7 @@ test("path encounter opens a battle arena with timeline, inspect, and party swap
     }
   });
 
-  await page.goto("/");
+  await page.goto("/dev.html");
   await page.keyboard.down("KeyD");
   await page.waitForTimeout(2400);
   await page.keyboard.up("KeyD");
