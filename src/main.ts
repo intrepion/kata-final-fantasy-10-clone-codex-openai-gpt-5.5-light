@@ -11,6 +11,20 @@ import {
   type CombatantId
 } from "./combat";
 import {
+  FIRST_BOARD_NODES,
+  awardEchoShard,
+  createProgressionState,
+  unlockBoardNode,
+  type BoardNodeId,
+  type ProgressionState
+} from "./progression";
+import {
+  createSaveSnapshot,
+  parseSaveSnapshot,
+  serializeSaveSnapshot,
+  type SaveSnapshot
+} from "./saveSnapshot";
+import {
   getCameraVolume,
   getSceneProgress,
   moveToward,
@@ -35,6 +49,7 @@ app.innerHTML = `
           <p>Kael begins the pilgrimage from village square to shellfiend overlook.</p>
         </div>
         <p class="status-pill" data-testid="camera-volume">Camera: Village Square</p>
+        <p class="status-pill" data-testid="echo-shards">Echo Shards: 0</p>
       </div>
       <div class="bottom-bar">
         <div class="controls-strip" aria-label="Controls">
@@ -61,6 +76,13 @@ app.innerHTML = `
       </div>
       <ol class="battle-log" data-testid="battle-log"></ol>
     </section>
+    <section class="board-panel" data-testid="board-panel" hidden>
+      <div class="battle-header">
+        <h2>Progression Board</h2>
+        <p data-testid="board-status">Choose a first node.</p>
+      </div>
+      <div class="board-nodes" data-testid="board-nodes"></div>
+    </section>
   </main>
 `;
 
@@ -72,8 +94,25 @@ const battleCurrent = app.querySelector<HTMLElement>("[data-testid='battle-curre
 const turnTimeline = app.querySelector<HTMLElement>("[data-testid='turn-timeline']");
 const combatantsPanel = app.querySelector<HTMLElement>("[data-testid='combatants']");
 const battleLog = app.querySelector<HTMLElement>("[data-testid='battle-log']");
+const echoShardLabel = app.querySelector<HTMLElement>("[data-testid='echo-shards']");
+const boardPanel = app.querySelector<HTMLElement>("[data-testid='board-panel']");
+const boardStatus = app.querySelector<HTMLElement>("[data-testid='board-status']");
+const boardNodes = app.querySelector<HTMLElement>("[data-testid='board-nodes']");
 
-if (!canvas || !cameraVolumeLabel || !audioToggle || !battlePanel || !battleCurrent || !turnTimeline || !combatantsPanel || !battleLog) {
+if (
+  !canvas ||
+  !cameraVolumeLabel ||
+  !audioToggle ||
+  !battlePanel ||
+  !battleCurrent ||
+  !turnTimeline ||
+  !combatantsPanel ||
+  !battleLog ||
+  !echoShardLabel ||
+  !boardPanel ||
+  !boardStatus ||
+  !boardNodes
+) {
   throw new Error("Missing Tidewake UI element");
 }
 
@@ -85,6 +124,10 @@ const battleCurrentElement = battleCurrent;
 const turnTimelineElement = turnTimeline;
 const combatantsElement = combatantsPanel;
 const battleLogElement = battleLog;
+const echoShardElement = echoShardLabel;
+const boardPanelElement = boardPanel;
+const boardStatusElement = boardStatus;
+const boardNodesElement = boardNodes;
 
 const renderer = new THREE.WebGLRenderer({
   canvas: sceneCanvas,
@@ -119,6 +162,11 @@ let destination: Vec2 = { ...kaelPosition };
 const pressedKeys = new Set<string>();
 let previousTime = performance.now();
 let battleState: BattleState | undefined;
+let progression: ProgressionState = createProgressionState();
+let defeatedEncounters: string[] = [];
+let battleRewardGranted = false;
+
+restoreSnapshot();
 
 buildScene();
 updateKaelMesh();
@@ -136,6 +184,8 @@ window.addEventListener("keydown", (event) => {
 
   if (event.code === "KeyE" && canStartPathEncounter()) {
     startBattle();
+  } else if (event.code === "KeyE" && canUseMemoryTide()) {
+    saveAtMemoryTide();
   }
 });
 window.addEventListener("keyup", (event) => pressedKeys.delete(event.code));
@@ -182,6 +232,17 @@ app.addEventListener("click", (event) => {
   }
 
   renderBattle();
+});
+
+app.addEventListener("click", (event) => {
+  const target = event.target;
+
+  if (!(target instanceof HTMLElement) || !target.dataset.node) {
+    return;
+  }
+
+  progression = unlockBoardNode(progression, target.dataset.node as BoardNodeId);
+  renderProgression();
 });
 
 function tick(now: number): void {
@@ -262,8 +323,14 @@ function canStartPathEncounter(): boolean {
 }
 
 function startBattle(): void {
+  if (defeatedEncounters.includes("skitterfin")) {
+    return;
+  }
+
   battleState = createTeachingBattle();
+  battleRewardGranted = false;
   battlePanelElement.hidden = false;
+  boardPanelElement.hidden = true;
   destinationMarker.visible = false;
   renderBattle();
   void audio.playConfirm();
@@ -296,6 +363,72 @@ function renderBattle(): void {
     .slice(0, 4)
     .map((entry) => `<li>${entry}</li>`)
     .join("");
+
+  if (battleState.won && !battleRewardGranted) {
+    battleRewardGranted = true;
+    defeatedEncounters = defeatedEncounters.includes("skitterfin")
+      ? defeatedEncounters
+      : [...defeatedEncounters, "skitterfin"];
+    progression = awardEchoShard(progression);
+    battlePanelElement.hidden = true;
+    battleState = undefined;
+    boardPanelElement.hidden = false;
+    updatePathEncounter();
+    renderProgression();
+  }
+}
+
+function renderProgression(): void {
+  echoShardElement.textContent = `Echo Shards: ${progression.echoShards}`;
+  boardStatusElement.textContent =
+    progression.unlockedNodes.length > 0
+      ? `Unlocked: ${progression.unlockedNodes.join(", ")}`
+      : "Choose a first node.";
+  boardNodesElement.innerHTML = FIRST_BOARD_NODES.map((node) => {
+    const unlocked = progression.unlockedNodes.includes(node.id);
+    return `
+      <article class="board-node ${unlocked ? "unlocked" : ""}">
+        <strong>${node.label}</strong>
+        <span>${node.kind}</span>
+        <p>${node.description}</p>
+        <button type="button" data-node="${node.id}" ${unlocked ? "disabled" : ""}>
+          ${unlocked ? "Unlocked" : `Spend ${node.cost}`}
+        </button>
+      </article>
+    `;
+  }).join("");
+}
+
+function canUseMemoryTide(): boolean {
+  return !battleState && Math.hypot(kaelPosition.x - -16.2, kaelPosition.z - 2.4) < 2.4;
+}
+
+function saveAtMemoryTide(): void {
+  const snapshot = createSaveSnapshot(kaelPosition, defeatedEncounters, progression);
+  localStorage.setItem("tidewake-save", serializeSaveSnapshot(snapshot));
+  void audio.playSave();
+}
+
+function restoreSnapshot(): void {
+  const snapshot = parseSaveSnapshot(localStorage.getItem("tidewake-save"));
+
+  if (!snapshot) {
+    renderProgression();
+    return;
+  }
+
+  applySnapshot(snapshot);
+}
+
+function applySnapshot(snapshot: SaveSnapshot): void {
+  kaelPosition = snapshot.scenePosition;
+  destination = { ...snapshot.scenePosition };
+  defeatedEncounters = snapshot.defeatedEncounters;
+  progression = {
+    echoShards: snapshot.echoShards,
+    unlockedNodes: snapshot.unlockedNodes
+  };
+  renderProgression();
 }
 
 function buildScene(): void {
@@ -324,6 +457,7 @@ function buildScene(): void {
   addVillageHuts();
   addPalms();
   addBlockers();
+  addMemoryTide();
   addOverlook();
 }
 
@@ -396,7 +530,7 @@ function addBlockers(): void {
 }
 
 function updatePathEncounter(): void {
-  pathEncounter.visible = !battleState;
+  pathEncounter.visible = !battleState && !defeatedEncounters.includes("skitterfin");
   pathEncounter.rotation.y += 0.015;
 }
 
@@ -408,6 +542,23 @@ function addOverlook(): void {
   gate.position.set(15.4, 1.8, -3.9);
   gate.rotation.x = Math.PI / 2;
   scene.add(gate);
+}
+
+function addMemoryTide(): void {
+  const marker = new THREE.Group();
+  const base = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.55, 0.75, 0.35, 16),
+    new THREE.MeshStandardMaterial({ color: 0x2f6f86, roughness: 0.5 })
+  );
+  const glow = new THREE.Mesh(
+    new THREE.SphereGeometry(0.42, 16, 12),
+    new THREE.MeshStandardMaterial({ color: 0x9ee8ff, emissive: 0x1f6f85, roughness: 0.25 })
+  );
+  base.position.y = 0.18;
+  glow.position.y = 0.78;
+  marker.add(base, glow);
+  marker.position.set(-16.2, 0, 2.4);
+  scene.add(marker);
 }
 
 function createKael(): THREE.Group {

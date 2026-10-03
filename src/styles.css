@@ -219,6 +219,73 @@ button {
   font-size: 0.82rem;
 }
 
+.board-panel {
+  position: absolute;
+  left: 20px;
+  bottom: 86px;
+  width: min(560px, calc(100vw - 40px));
+  padding: 14px;
+  border: 1px solid rgb(255 209 102 / 28%);
+  background: rgb(21 28 35 / 88%);
+  backdrop-filter: blur(12px);
+  color: #f8fbff;
+}
+
+.board-panel[hidden] {
+  display: none;
+}
+
+.board-nodes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.board-node {
+  min-height: 132px;
+  padding: 10px;
+  border: 1px solid rgb(255 255 255 / 18%);
+  background: rgb(255 255 255 / 7%);
+}
+
+.board-node strong,
+.board-node span,
+.board-node p {
+  display: block;
+}
+
+.board-node span {
+  margin-top: 3px;
+  color: #ffd166;
+  font-size: 0.76rem;
+}
+
+.board-node p {
+  min-height: 46px;
+  margin: 8px 0;
+  color: #dce9ef;
+  font-size: 0.78rem;
+}
+
+.board-node button {
+  width: 100%;
+  min-height: 34px;
+  border: 1px solid rgb(255 255 255 / 24%);
+  background: rgb(54 92 83 / 92%);
+  color: #f8fbff;
+  cursor: pointer;
+}
+
+.board-node.unlocked {
+  border-color: #ffd166;
+  background: rgb(255 209 102 / 14%);
+}
+
+.board-node button:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
 @media (max-width: 720px) {
   .hud {
     padding: 12px;
@@ -239,8 +306,14 @@ button {
     bottom: 118px;
   }
 
+  .board-panel {
+    left: 12px;
+    bottom: 118px;
+  }
+
   .command-menu,
-  .combatants {
+  .combatants,
+  .board-nodes {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
