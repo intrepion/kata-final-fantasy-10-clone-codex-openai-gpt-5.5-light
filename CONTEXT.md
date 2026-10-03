@@ -24,6 +24,10 @@ _Avoid_: Level, map, zone
 A staged combat space entered from a pilgrimage scene when an encounter begins. It presents party members, enemies, and the turn timeline without sharing exploration movement rules.
 _Avoid_: Combat map, fight screen, battle scene
 
+**Action Delay**:
+The timing cost applied after a battle command resolves. Action delay determines where the actor returns on the turn timeline.
+_Avoid_: Cooldown, initiative cost, recovery time
+
 **Path Encounter**:
 A visible enemy presence on a pilgrimage scene path that can trigger combat. Path encounters make the first slice verifiable without relying on hidden random battle timing.
 _Avoid_: Random battle, roaming mob, trash encounter
@@ -96,6 +100,10 @@ _Avoid_: Hybrid class, subclass, cross-skill
 A pilgrimage figure who performs rituals meant to quiet the sea-born catastrophe. The rite-singer gives the journey a story purpose without using the reference game's summoner identity.
 _Avoid_: Summoner, priest, bard
 
+**Maera**:
+The novice rite-singer in the starting party. Maera begins as the elemental caster and carries the pilgrimage's ritual purpose.
+_Avoid_: Yuna, priestess, mage
+
 **Guardian**:
 A companion sworn to protect the rite-singer through the pilgrimage. Guardians are defined by duty to the pilgrimage, not by a generic party-member slot.
 _Avoid_: Escort, bodyguard, party member
@@ -104,13 +112,29 @@ _Avoid_: Escort, bodyguard, party member
 The player-controlled exploration lead for the first slice. The young guardian carries direct movement agency while the rite-singer remains narratively central.
 _Avoid_: Protagonist, hero, avatar
 
+**Kael**:
+The young guardian controlled during first-slice exploration. Kael begins as the fast striker and gives the player direct movement agency.
+_Avoid_: Tidus, avatar, hero
+
 **Village Veteran**:
 The experienced starting guardian who embodies the armored breaker role. The village veteran grounds the first party in Tidewake's local history and combat discipline.
 _Avoid_: Mentor, tank, old warrior
 
+**Orun**:
+The village veteran in the starting party. Orun begins as the armored breaker and represents practiced Tidewake combat discipline.
+_Avoid_: Auron, mentor, tank
+
 **Sea-Born Catastrophe**:
 The recurring oceanic threat that motivates the pilgrimage. It is a world condition and story pressure, not just the first boss.
 _Avoid_: Sin, calamity, sea monster
+
+**Tidebound Shellfiend**:
+The first boss encounter, a sea-armored creature with shifting shell phases. It tests armored breaking, elemental weakness hits, and fast timeline control.
+_Avoid_: Sinspawn, crab boss, shell monster
+
+**Memory Tide**:
+A glowing tidal marker where pilgrims rest, recover, and preserve their save snapshot. It is the first slice's in-world save point fiction.
+_Avoid_: Save sphere, checkpoint, shrine
 
 **Save Snapshot**:
 The persistent slice state restored after reload. For the first slice, it includes scene position, defeated encounters, boss state, party health, echo shards, and unlocked board nodes.
