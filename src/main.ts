@@ -1,6 +1,16 @@
 import * as THREE from "three";
 import { TidewakeAudio } from "./audio";
 import {
+  attack,
+  createTeachingBattle,
+  getCurrentActor,
+  getTurnTimeline,
+  inspect,
+  partySwap,
+  type BattleState,
+  type CombatantId
+} from "./combat";
+import {
   getCameraVolume,
   getSceneProgress,
   moveToward,
@@ -36,20 +46,45 @@ app.innerHTML = `
         <button class="audio-button" type="button" data-testid="audio-toggle">Audio Off</button>
       </div>
     </section>
+    <section class="battle-panel" data-testid="battle-panel" hidden>
+      <div class="battle-header">
+        <h2>Beach Path Encounter</h2>
+        <p data-testid="battle-current">Kael is ready.</p>
+      </div>
+      <div class="timeline" data-testid="turn-timeline"></div>
+      <div class="combatants" data-testid="combatants"></div>
+      <div class="command-menu" aria-label="Command menu">
+        <button type="button" data-command="attack">Attack</button>
+        <button type="button" data-command="inspect">Inspect</button>
+        <button type="button" data-command="swap-orun">Swap Orun</button>
+        <button type="button" data-command="swap-maera">Swap Maera</button>
+      </div>
+      <ol class="battle-log" data-testid="battle-log"></ol>
+    </section>
   </main>
 `;
 
 const canvas = app.querySelector<HTMLCanvasElement>("[data-testid='scene-canvas']");
 const cameraVolumeLabel = app.querySelector<HTMLElement>("[data-testid='camera-volume']");
 const audioToggle = app.querySelector<HTMLButtonElement>("[data-testid='audio-toggle']");
+const battlePanel = app.querySelector<HTMLElement>("[data-testid='battle-panel']");
+const battleCurrent = app.querySelector<HTMLElement>("[data-testid='battle-current']");
+const turnTimeline = app.querySelector<HTMLElement>("[data-testid='turn-timeline']");
+const combatantsPanel = app.querySelector<HTMLElement>("[data-testid='combatants']");
+const battleLog = app.querySelector<HTMLElement>("[data-testid='battle-log']");
 
-if (!canvas || !cameraVolumeLabel || !audioToggle) {
+if (!canvas || !cameraVolumeLabel || !audioToggle || !battlePanel || !battleCurrent || !turnTimeline || !combatantsPanel || !battleLog) {
   throw new Error("Missing Tidewake UI element");
 }
 
 const sceneCanvas = canvas;
 const cameraVolumeStatus = cameraVolumeLabel;
 const audioButton = audioToggle;
+const battlePanelElement = battlePanel;
+const battleCurrentElement = battleCurrent;
+const turnTimelineElement = turnTimeline;
+const combatantsElement = combatantsPanel;
+const battleLogElement = battleLog;
 
 const renderer = new THREE.WebGLRenderer({
   canvas: sceneCanvas,
@@ -73,6 +108,9 @@ const audio = new TidewakeAudio();
 const kael = createKael();
 scene.add(kael);
 
+const pathEncounter = createPathEncounter();
+scene.add(pathEncounter);
+
 const destinationMarker = createDestinationMarker();
 scene.add(destinationMarker);
 
@@ -80,6 +118,7 @@ let kaelPosition: Vec2 = { x: -14, z: 0 };
 let destination: Vec2 = { ...kaelPosition };
 const pressedKeys = new Set<string>();
 let previousTime = performance.now();
+let battleState: BattleState | undefined;
 
 buildScene();
 updateKaelMesh();
@@ -93,6 +132,10 @@ window.addEventListener("keydown", (event) => {
 
   if (event.code === "KeyM") {
     void toggleAudio();
+  }
+
+  if (event.code === "KeyE" && canStartPathEncounter()) {
+    startBattle();
   }
 });
 window.addEventListener("keyup", (event) => pressedKeys.delete(event.code));
@@ -115,12 +158,38 @@ audioButton.addEventListener("click", () => {
   void toggleAudio();
 });
 
+app.addEventListener("click", (event) => {
+  const target = event.target;
+
+  if (!(target instanceof HTMLElement) || !target.dataset.command || !battleState) {
+    return;
+  }
+
+  if (target.dataset.command === "attack") {
+    battleState = attack(battleState);
+  }
+
+  if (target.dataset.command === "inspect") {
+    battleState = inspect(battleState);
+  }
+
+  if (target.dataset.command === "swap-orun") {
+    battleState = partySwap(battleState, "orun");
+  }
+
+  if (target.dataset.command === "swap-maera") {
+    battleState = partySwap(battleState, "maera");
+  }
+
+  renderBattle();
+});
+
 function tick(now: number): void {
   const dt = Math.min((now - previousTime) / 1000, 0.08);
   previousTime = now;
   const keyboardVector = getKeyboardVector();
 
-  if (keyboardVector.x !== 0 || keyboardVector.z !== 0) {
+  if (!battleState && (keyboardVector.x !== 0 || keyboardVector.z !== 0)) {
     destination = { ...kaelPosition };
     const next = {
       x: kaelPosition.x + keyboardVector.x * 6 * dt,
@@ -128,11 +197,12 @@ function tick(now: number): void {
     };
     kaelPosition = resolveWalkablePosition(next);
     destinationMarker.visible = false;
-  } else {
+  } else if (!battleState) {
     kaelPosition = resolveWalkablePosition(moveToward(kaelPosition, destination, 4.2 * dt));
   }
 
   updateKaelMesh();
+  updatePathEncounter();
   updateCamera(false);
   renderer.render(scene, camera);
   requestAnimationFrame(tick);
@@ -185,6 +255,47 @@ function resize(): void {
 async function toggleAudio(): Promise<void> {
   const muted = await audio.toggle();
   audioButton.textContent = muted ? "Audio Off" : "Audio On";
+}
+
+function canStartPathEncounter(): boolean {
+  return !battleState && Math.hypot(kaelPosition.x - -0.6, kaelPosition.z - -1.8) < 2.6;
+}
+
+function startBattle(): void {
+  battleState = createTeachingBattle();
+  battlePanelElement.hidden = false;
+  destinationMarker.visible = false;
+  renderBattle();
+  void audio.playConfirm();
+}
+
+function renderBattle(): void {
+  if (!battleState) {
+    return;
+  }
+
+  const current = getCurrentActor(battleState);
+  battleCurrentElement.textContent = battleState.won
+    ? "The Skitterfin is defeated."
+    : `${current.name} is ready.`;
+  turnTimelineElement.textContent = getTurnTimeline(battleState)
+    .slice(0, 4)
+    .map((combatant) => combatant.name)
+    .join(" -> ");
+  combatantsElement.innerHTML = battleState.combatants
+    .map(
+      (combatant) => `
+        <article class="combatant ${combatant.active ? "active" : ""}" data-testid="combatant-${combatant.id}">
+          <strong>${combatant.name}</strong>
+          <span>${combatant.hp}/${combatant.maxHp} HP</span>
+        </article>
+      `
+    )
+    .join("");
+  battleLogElement.innerHTML = battleState.log
+    .slice(0, 4)
+    .map((entry) => `<li>${entry}</li>`)
+    .join("");
 }
 
 function buildScene(): void {
@@ -284,6 +395,11 @@ function addBlockers(): void {
   }
 }
 
+function updatePathEncounter(): void {
+  pathEncounter.visible = !battleState;
+  pathEncounter.rotation.y += 0.015;
+}
+
 function addOverlook(): void {
   const gate = new THREE.Mesh(
     new THREE.TorusGeometry(1.6, 0.14, 8, 18),
@@ -320,4 +436,22 @@ function createDestinationMarker(): THREE.Mesh {
   marker.rotation.x = -Math.PI / 2;
   marker.visible = false;
   return marker;
+}
+
+function createPathEncounter(): THREE.Group {
+  const group = new THREE.Group();
+  const body = new THREE.Mesh(
+    new THREE.ConeGeometry(0.7, 0.7, 7),
+    new THREE.MeshStandardMaterial({ color: 0x61d6ff, emissive: 0x0b4156, roughness: 0.5 })
+  );
+  const shell = new THREE.Mesh(
+    new THREE.SphereGeometry(0.5, 8, 8),
+    new THREE.MeshStandardMaterial({ color: 0xd9f7ff, roughness: 0.8 })
+  );
+  body.rotation.x = Math.PI;
+  body.position.y = 0.45;
+  shell.position.y = 0.68;
+  group.add(body, shell);
+  group.position.set(-0.6, 0, -1.8);
+  return group;
 }

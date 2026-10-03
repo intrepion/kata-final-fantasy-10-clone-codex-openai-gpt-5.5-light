@@ -127,6 +127,98 @@ button {
   outline: none;
 }
 
+.battle-panel {
+  position: absolute;
+  right: 20px;
+  bottom: 86px;
+  width: min(520px, calc(100vw - 40px));
+  padding: 14px;
+  border: 1px solid rgb(255 255 255 / 24%);
+  background: rgb(9 17 26 / 86%);
+  backdrop-filter: blur(12px);
+  color: #f8fbff;
+}
+
+.battle-panel[hidden] {
+  display: none;
+}
+
+.battle-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.battle-header h2,
+.battle-header p {
+  margin: 0;
+}
+
+.battle-header h2 {
+  font-size: 1rem;
+}
+
+.timeline {
+  margin-bottom: 10px;
+  padding: 8px;
+  border: 1px solid rgb(158 232 255 / 32%);
+  color: #dff8ff;
+  font-size: 0.86rem;
+}
+
+.combatants {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.combatant {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px;
+  border: 1px solid rgb(255 255 255 / 18%);
+  background: rgb(255 255 255 / 7%);
+  font-size: 0.84rem;
+}
+
+.combatant.active {
+  border-color: #ffd166;
+  background: rgb(255 209 102 / 14%);
+}
+
+.command-menu {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.command-menu button {
+  min-height: 36px;
+  border: 1px solid rgb(255 255 255 / 24%);
+  background: rgb(35 75 91 / 92%);
+  color: #f8fbff;
+  cursor: pointer;
+}
+
+.command-menu button:hover,
+.command-menu button:focus-visible {
+  border-color: #9ee8ff;
+  outline: none;
+}
+
+.battle-log {
+  margin: 0;
+  padding-left: 20px;
+  color: #dce9ef;
+  font-size: 0.82rem;
+}
+
 @media (max-width: 720px) {
   .hud {
     padding: 12px;
@@ -140,5 +232,15 @@ button {
 
   .status-pill {
     text-align: left;
+  }
+
+  .battle-panel {
+    right: 12px;
+    bottom: 118px;
+  }
+
+  .command-menu,
+  .combatants {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
