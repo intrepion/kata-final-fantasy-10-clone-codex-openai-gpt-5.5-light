@@ -20,6 +20,18 @@ _Avoid_: Campaign, overworld, route
 A fixed-camera 3D explorable location on the pilgrimage. A scene contains walkable paths, characters, encounter triggers, and exits.
 _Avoid_: Level, map, zone
 
+**Camera Volume**:
+An authored region of a pilgrimage scene that selects a fixed camera composition. Tidewake begins with camera volumes for the village square, beach bend, and shellfiend overlook.
+_Avoid_: Camera trigger, shot zone, view area
+
+**Destination Movement**:
+Exploration movement where the player chooses a ground destination and Kael walks toward it. Keyboard movement remains available as a fallback, but destination movement is the primary fixed-camera feel.
+_Avoid_: Click movement, point-and-click, mouse walking
+
+**Dialogue Box**:
+The JRPG-style text surface for NPC interactions, including a nameplate, portrait, and concise lines. The first slice keeps dialogue short enough to support tone without becoming a dialogue-system project.
+_Avoid_: Chat window, textbox, conversation UI
+
 **Battle Arena**:
 A staged combat space entered from a pilgrimage scene when an encounter begins. It presents party members, enemies, and the turn timeline without sharing exploration movement rules.
 _Avoid_: Combat map, fight screen, battle scene
@@ -47,6 +59,14 @@ _Avoid_: Initiative queue, ATB bar
 **Command Menu**:
 The deliberate battle input surface for choosing attacks, abilities, party swaps, and items. It may expose keyboard shortcuts, but the menu remains the canonical interaction.
 _Avoid_: Hotbar, action buttons, radial menu
+
+**Inspect Hint**:
+A command-menu hint that reveals or reinforces an enemy's likely weakness. Inspect hints work with visual traits so the first slice rewards observation without requiring memorization.
+_Avoid_: Scan spell, tooltip, bestiary
+
+**Visual Trait**:
+An enemy visual cue that suggests its role counter or elemental weakness. Shell plating, quick silhouettes, and crackling water are examples of visual traits.
+_Avoid_: Affordance, tell, marker
 
 **Role Counter**:
 A party member's tactical answer to a specific enemy class or combat problem. Role counters make party identity matter in battle.
@@ -79,6 +99,10 @@ _Avoid_: Experience point, sphere, skill point
 **Progression Board**:
 The character growth system where earned resources unlock adjacent nodes that shape stats, skills, and role drift.
 _Avoid_: Sphere Grid, skill tree, leveling screen
+
+**Board Overlay**:
+The compact progression board presentation opened from post-battle rewards and later from the pause menu. It shows enough node structure to teach progression without feeling like a separate subsystem.
+_Avoid_: Upgrade screen, skill menu, progression page
 
 **Board Node**:
 A single unlockable space on the progression board. A board node grants a concrete character improvement.
