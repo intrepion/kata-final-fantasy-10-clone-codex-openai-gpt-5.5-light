@@ -26,7 +26,7 @@ jobs:
           CAPTURE_OUTPUT: capture-output
         run: |
           export GAME_SOURCE_COMMIT="e73bd8d86efae7c39c57ae7ef0bff91eb436f803"
-          python3 -m http.server 4297 --bind 127.0.0.1 > /tmp/tidewake-light-http.log 2>&1 &
+          python3 -m http.server 4297 --bind 127.0.0.1 --directory file-dist > /tmp/tidewake-light-http.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid"' EXIT
           for i in $(seq 1 40); do curl --fail --silent http://127.0.0.1:4297/ > /dev/null && break; sleep 0.25; done
