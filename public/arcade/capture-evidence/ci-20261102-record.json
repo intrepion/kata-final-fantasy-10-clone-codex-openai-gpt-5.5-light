@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "workflowCommit": "fa7daabe5d0013bb547549ad450b420b38079948",
+  "sourceCommit": "e73bd8d86efae7c39c57ae7ef0bff91eb436f803",
+  "runId": "41449103911",
+  "url": "http://127.0.0.1:4297/",
+  "inputs": {
+    "index.html": "b539be8c13185f888161a954ed78b936aeaebbbf5b6aace7d8748aac01233978",
+    "game.bundle.js": "c99a7a14e5a75179aa4d69e9b75e81f073ed5f5eb9ebc574c4d4084b694e8723",
+    "game.bundle.css": "91996600433b93a80aee98d5d330b23507855e07769b6a15160b111a3c1bbab8"
+  },
+  "browser": "153.0.8010.12",
+  "viewport": {
+    "width": 1280,
+    "height": 1000
+  },
+  "screenshots": [
+    "tidewake-01.png",
+    "tidewake-02.png"
+  ]
+}
