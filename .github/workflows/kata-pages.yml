@@ -24,8 +24,10 @@ jobs:
           package-manager-cache: false
       - uses: actions/configure-pages@v5
       - run: npm ci
+      - run: node scripts/verify-arcade.mjs
       - run: npm run test:unit
       - run: npm run bundle:direct
+      - run: cp -R public/arcade file-dist/arcade
       - uses: actions/upload-pages-artifact@v4
         with:
           path: file-dist
