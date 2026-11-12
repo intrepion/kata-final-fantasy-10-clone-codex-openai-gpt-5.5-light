@@ -15,20 +15,20 @@ jobs:
       contents: read
       pages: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6.1.0
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@v7.1.0
         with:
           node-version: "24"
           package-manager-cache: false
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v5.0.0
       - run: npm ci
       - run: node scripts/verify-arcade.mjs
       - run: npm run test:unit
       - run: npm run bundle:direct
       - run: cp -R public/arcade file-dist/arcade
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-pages-artifact@v4.0.0
         with:
           path: file-dist
   deploy:
@@ -44,4 +44,4 @@ jobs:
     steps:
       - name: Deploy playable site
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v4.0.5
